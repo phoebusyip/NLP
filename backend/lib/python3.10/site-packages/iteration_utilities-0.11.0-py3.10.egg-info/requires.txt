@@ -1,0 +1,12 @@
+
+[all]
+pytest
+sphinx
+numpydoc
+
+[doc]
+sphinx
+numpydoc
+
+[test]
+pytest
