@@ -28,6 +28,6 @@ examples:
 
 The terminal will then output # of positive, negative and neutral comments.
 A csv file will also be generated that contains every comment in that video, as well as the polarity, like count, publish and update date of each comment.
-
+For testing purposes only 10 comments are scrapped from each video.
 
 
