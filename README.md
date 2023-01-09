@@ -1,6 +1,8 @@
 Youtube NLP Project
 By: Phoebus Yip
 
+Interpreters: Python 3.9.6
+
 2 separate parts right now:
 
 To see hosted demo:
