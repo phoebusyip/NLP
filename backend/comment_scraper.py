@@ -2,66 +2,54 @@ import os
 from dotenv import load_dotenv
 from googleapiclient.discovery import build
 # from iteration_utilities import unique_everseen
-
 from utils.comments import filter_comments, create_csv
 from textblob import TextBlob
-load_dotenv()
 # API_KEY = os.getenv("API_KEY")
-API_KEY = "AIzaSyBVKUAWB-OKmEuPnHEoteXroHWUuRVcidg"
 
+
+# set up backend firebase 
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import firestore
+
+load_dotenv()
+cred = credentials.Certificate('nlp-youtube-374018-firebase-adminsdk-j66ps-f75e10e283.json')
+app = firebase_admin.initialize_app(cred)
+db = firestore.client()
+
+
+# set up youtube API 
+API_KEY = "AIzaSyBVKUAWB-OKmEuPnHEoteXroHWUuRVcidg"
 youtube = build("youtube", "v3", developerKey=API_KEY)
 
-
-# def search_result(query):
-#     """
-#     Refer to the documentation: https://googleapis.github.io/google-api-python-client/docs/dyn/youtube_v3.search.html
-#     """
-#     request = youtube.search().list(
-#         part="snippet",
-#         q=query,
-#         maxResults=10,
-#     )
-
-#     return request.execute()
-
-
-# def channel_stats(channelID):
-#     """
-#     Refer to the documentation: https://googleapis.github.io/google-api-python-client/docs/dyn/youtube_v3.channels.html
-#     """
-#     request = youtube.channels().list(
-#         part="statistics",
-#         id=channelID
-#     )
-#     return request.execute()
-
-
-def comment_threads(channelID, make_csv=False):
+# program to scrape comments and write to Firestore
+def comment_threads(videoId, make_csv=False):
 
     all_comments = []
 
+    # request params. maxResult = 10 for testing purposes
     request = youtube.commentThreads().list(
         part='id,replies,snippet',
-        videoId=channelID,
+        videoId=videoId,
         maxResults=10,
     )
     response = request.execute()
-    all_comments.append(filter_comments(response["items"]))
-
-    # see polarity of each comment
 
     # allcomments[0] is the list of comment objects
-    # print(all_comments[0])
+    all_comments.append(filter_comments(response["items"]))
+
+    # calculate polarity of each comment, generate overall polarity for all comments
     avg_polarity = 0
     positive_pol = 0
     negative_pol = 0
     neutral_pol = 0
+    
     for comment_obj in all_comments[0]:
 
         text = TextBlob(str(comment_obj["textOriginal"]))
-
         comment_obj["polarity"] = text.sentiment.polarity
         avg_polarity += comment_obj["polarity"]
+
         if comment_obj["polarity"] > 0:
             positive_pol += 1
         elif comment_obj["polarity"] < 0:
@@ -72,70 +60,48 @@ def comment_threads(channelID, make_csv=False):
     avg_polarity /= len(comment_obj)
     print("positive pol: ", positive_pol, "\nnegative pol", negative_pol,
           "\nneutral pol", neutral_pol, "\naverage pol", avg_polarity)
-    # print(comment_obj)
-
-    # print(comment.sentiment.polarity)
-
-    # all_comments[0][0]["polarity"] = comment.sentiment.polarity
-
-    # print(all_comments[0][0])
 
     if make_csv:
         create_csv(all_comments[0], None, pyscriptVidId)
-    # all_comments.append(response)
-    # print(all_comments)
+
+    # write each comment of videoId to Firestore db
+    # each videoID will have a collection containing documents of all comments
+    for comment in all_comments[0]:
+        doc_ref = db.collection(comment["videoId"]).document(comment["commentId"])
+        doc_ref.set({
+            u'videoId': comment["videoId"],
+            u'polarity': comment["polarity"],
+            u'likeCount': comment["likeCount"],
+            u'time_published': comment["publishedAt"],
+            u'time_updated': comment["updatedAt"]
+        })
+
+    # write overall polarity for all comments for video to Firestore db
+    # create new collection of ALL videos, containing documents of polarity reviews
+    doc_ref = db.collection(u'videos').document(videoId)
+    doc_ref.set({
+        u'positive_comments': positive_pol,
+        u'negative_comments': negative_pol,
+        u'neutral_comments': neutral_pol,
+        u'average_comments': avg_polarity
+    })
+
+    # concern: messy video collection that contains 1 document of polarity scores 
+    # and x number of documents each containing one comment.
+    # maybe better to have another collection of only video sentiments?
     return all_comments
-
-
-# def get_video_ids(channelId):
-#     """
-#     Refer to the documentation: https://googleapis.github.io/google-api-python-client/docs/dyn/youtube_v3.search.html
-#     """
-#     videoIds = []
-
-#     request = youtube.search().list(
-#         part="snippet",
-#         channelId=channelId,
-#         type="video",
-#         maxResults=50,
-#         order="date"
-#     )
-
-#     response = request.execute()
-#     responseItems = response['items']
-
-#     videoIds.extend([item['id']['videoId']
-#                     for item in responseItems if item['id'].get('videoId', None) != None])
-
-#     # if there is nextPageToken, then keep calling the API
-#     while response.get('nextPageToken', None):
-#         request = youtube.search().list(
-#             part="snippet",
-#             channelId=channelId,
-#         )
-#         response = request.execute()
-#         responseItems = response['items']
-
-#         videoIds.extend([item['id']['videoId']
-#                         for item in responseItems if item['id'].get('videoId', None) != None])
-
-#     print(
-#         f"Finished fetching videoIds for {channelId}. {len(videoIds)} videos found.")
-
-#     return videoIds
 
 # def main():
 #     # comment_threads('Qo8dXyKXyME')
 
 if __name__ == '__main__':
+    # FOR TESTING: hardcoded videoID to test firebase and docker (in the future)
+    # pyscriptVidId = 'z-0skBH1ZEY'
+
+
+    # FOR TESTING: simple terminal UI to test program for any video ID
     print("Enter Youtube videoID: ")
     pyscriptVidId = input()
     print("You entered: ", pyscriptVidId)
-    # pyscriptVidId = 'z-0skBH1ZEY'
-    # channelId = 'UCzIxc8Vg53_ewaRIk3shBug'
 
-    # response = search_result("pyscript")
-    # response = channel_stats(channelId)
     response = comment_threads(pyscriptVidId, True)
-
-    # print(response)
