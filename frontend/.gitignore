@@ -28,4 +28,4 @@ yarn-error.log*
 .env.production.local
 
 #temp
-.storage.rules
+storage.rules
