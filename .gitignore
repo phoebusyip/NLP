@@ -70,6 +70,6 @@ node_modules/
 /out/
 
 # python
-/lib/
-/pycache/
-/bin/
+lib/
+pycache/
+bin/
