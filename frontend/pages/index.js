@@ -18,25 +18,19 @@
 import { useEffect, useState } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { EmailAuthProvider, GoogleAuthProvider } from "firebase/auth";
+// import { EmailAuthProvider, GoogleAuthProvider } from "firebase/auth";
 import {
-  Button,
-  CircularProgress,
+  // Button,
+  // CircularProgress,
   Container,
-  Dialog,
-  Divider,
+  // Dialog,
+  // Divider,
   Typography,
 } from "@mui/material";
-import { auth } from "../firebase/firebase";
 import styles from "../styles/landing.module.scss";
 
 const Emoji = (props) => (
-  <span
-    className="emoji"
-    role="img"
-    // aria-label={props.label ? props.label : ""}
-    // aria-hidden={props.label ? "false" : "true"}
-  >
+  <span className="emoji" role="img">
     {props.symbol}
   </span>
 );
@@ -54,8 +48,8 @@ export default function Home() {
       <main>
         <Container className={styles.container}>
           <Typography variant="h1">
-            Y<Emoji label="sheep" symbol="😊" />
-            <Emoji label="sheep" symbol="😔" />
+            Y<Emoji label="smiley" symbol="😊" />
+            <Emoji label="sad" symbol="😔" />
             Tube
           </Typography>
           <Typography variant="h2">
