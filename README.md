@@ -9,6 +9,9 @@ To see hosted demo:
 $ cd frontend
 $ firebase deploy
 
+To run website locally:
+$ cd frontend
+$ npm run dev
 
 To use the website:
 enter videoID of any youtube channel ( for a link such as https://www.youtube.com/watch?v=q2RZOiUD5E0 video id is q2RZOiUD5E0 (after ?v=))
