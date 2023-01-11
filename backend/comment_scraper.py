@@ -64,8 +64,12 @@ def comment_threads(videoId, make_csv=False):
     if make_csv:
         create_csv(all_comments[0], None, pyscriptVidId)
 
+    # Firestore system. Collection : document1, document2, document3
+
     # write each comment of videoId to Firestore db
-    # each videoID will have a collection containing documents of all comments
+    # each video will have its own collection, containing documents of every comment
+    # each comment document will contain videoID, polarity, likeCount, publish time and updated time 
+    # e.g. collection videoID: [{comment1}, {comment2}]
     for comment in all_comments[0]:
         doc_ref = db.collection(comment["videoId"]).document(comment["commentId"])
         doc_ref.set({
@@ -77,7 +81,10 @@ def comment_threads(videoId, make_csv=False):
         })
 
     # write overall polarity for all comments for video to Firestore db
-    # create new collection of ALL videos, containing documents of polarity reviews
+    # create/update collection that contains ALL videos
+    # each videoID document will be in the format of = {videoID : {positive polarity}, {negative polarity}} etc
+    # e.g. collection videos: [{videoID1 : [{positive polarity}, {negative polarity}], {videoID2 ...}]
+
     doc_ref = db.collection(u'videos').document(videoId)
     doc_ref.set({
         u'positive_comments': positive_pol,
@@ -86,9 +93,6 @@ def comment_threads(videoId, make_csv=False):
         u'average_comments': avg_polarity
     })
 
-    # concern: messy video collection that contains 1 document of polarity scores 
-    # and x number of documents each containing one comment.
-    # maybe better to have another collection of only video sentiments?
     return all_comments
 
 # def main():
