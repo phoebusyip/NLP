@@ -1,14 +1,11 @@
 Youtube NLP Project
 By: Phoebus Yip
 
-Interpreters: Python 3.9.6
+Interpreters: Python 3.9.6 
 
-2 separate parts right now:
-
-To see hosted demo: https://nlp--374018.web.app/
+To see hosted pure frontend demo: https://nlp--374018.web.app/
 $ cd frontend
 $ firebase deploy
-
 
 To run website locally:
 $ cd frontend
@@ -20,6 +17,7 @@ enter videoID of any youtube channel ( for a link such as https://www.youtube.co
 To be added to the website: 
 Show number of positive, negative and neutral comments of each video
 
+BACKEND:
 To use the python comment scrapper:
 $ cd backend
 $ pip3 install -r requirements.txt
@@ -31,7 +29,7 @@ examples:
 - J0soR73Jbio
 
 The terminal will then output # of positive, negative and neutral comments.
-A csv file will also be generated that contains every comment in that video, as well as the polarity, like count, publish and update date of each comment.
+A csv file will also be generated that contains comments in that video, as well as the polarity, like count, publish and update date of each comment.
 For testing purposes only 10 comments are scrapped from each video.
 
 
