@@ -6,7 +6,6 @@ from utils.comments import filter_comments, create_csv
 from textblob import TextBlob
 # API_KEY = os.getenv("API_KEY")
 
-
 # set up backend firebase 
 import firebase_admin
 from firebase_admin import credentials
@@ -69,9 +68,6 @@ def comment_threads(videoId, make_csv=False):
 
     # write overall polarity for all comments for video to Firestore db
     # create/update "videos" collection that contains ALL videos
-    # each videoID document will be in the format of 
-    # {videoID : [{num_positive_comments}, {num_negative_comments}... ] etc
-
     doc_ref = db.collection(u'videos').document(videoId)
     doc_ref.set({
         u'positive_comments': positive_pol,
@@ -87,11 +83,12 @@ def comment_threads(videoId, make_csv=False):
     comments_document = doc_ref.collection("comments")
 
     # write each comment of videoId to Firestore db
-    # each video will be its own document, containing every comment
+    # each video will be its own document, containing: 
+    # collection: a comments collection containing all comments:
+        # each comment document in this collection will contain videoID, polarity, likeCount, publish time and updated time of comment
+    # documents of polarity scores e.g. average polarity, highest polarity and number of positive comments
+
     # update videoID document (created above) with all comments
-    # i.e. now each videoID document will look like:
-    # {videoID: [{num_positive_comments}, {num_negative_comments}, {commentId: [{polarity}, {likeCount}...]}, {commentId: ...}]}
-    # each comment document will contain videoID, polarity, likeCount, publish time and updated time 
     for comment in all_comments[0]:
         com_ref = comments_document.document(comment["commentId"])
         com_ref.set({
@@ -111,12 +108,12 @@ def comment_threads(videoId, make_csv=False):
     return all_comments
 
 # def main():
-#     # comment_threads('Qo8dXyKXyME')
+    # comment_threads('Qo8dXyKXyME')
 
 if __name__ == '__main__':
     # FOR TESTING: hardcoded videoID to test firebase and docker (in the future)
-    pyscriptVidId = 'z-0skBH1ZEY'
-
+    # pyscriptVidId = 'z-0skBH1ZEY'
+    pyscriptVidId = 'Qo8dXyKXyME'
 
     # FOR TESTING: simple terminal UI to test program for any video ID
     # print("Enter Youtube videoID: ")

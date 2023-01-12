@@ -1,15 +1,15 @@
 @import "variables.module";
 
 .container {
-  font-size: 84px;
+  font-size: 80px;
   margin-top: 2em;
+}
+
+.polarityReview .video_form {
+  font-size: 30px;
 }
 
 .buttons {
   display: flex;
   margin-top: 0.5em;
-}
-
-.login-button {
-  background-color: $primary;
 }
