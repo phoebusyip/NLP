@@ -43,12 +43,16 @@ def comment_threads(videoId, make_csv=False):
     positive_pol = 0
     negative_pol = 0
     neutral_pol = 0
+    highest_pol = float('-inf')
+    lowest_pol = float('inf')
     
     for comment_obj in all_comments[0]:
 
         text = TextBlob(str(comment_obj["textOriginal"]))
         comment_obj["polarity"] = text.sentiment.polarity
         avg_polarity += comment_obj["polarity"]
+        highest_pol = max(highest_pol, comment_obj["polarity"])
+        lowest_pol = min(lowest_pol, comment_obj["polarity"])
 
         if comment_obj["polarity"] > 0:
             positive_pol += 1
@@ -61,37 +65,48 @@ def comment_threads(videoId, make_csv=False):
     print("positive pol: ", positive_pol, "\nnegative pol", negative_pol,
           "\nneutral pol", neutral_pol, "\naverage pol", avg_polarity)
 
-    if make_csv:
-        create_csv(all_comments[0], None, pyscriptVidId)
-
     # Firestore system. Collection : document1, document2, document3
 
-    # write each comment of videoId to Firestore db
-    # each video will have its own collection, containing documents of every comment
-    # each comment document will contain videoID, polarity, likeCount, publish time and updated time 
-    # e.g. collection videoID: [{comment1}, {comment2}]
-    for comment in all_comments[0]:
-        doc_ref = db.collection(comment["videoId"]).document(comment["commentId"])
-        doc_ref.set({
-            u'videoId': comment["videoId"],
-            u'polarity': comment["polarity"],
-            u'likeCount': comment["likeCount"],
-            u'time_published': comment["publishedAt"],
-            u'time_updated': comment["updatedAt"]
-        })
-
     # write overall polarity for all comments for video to Firestore db
-    # create/update collection that contains ALL videos
-    # each videoID document will be in the format of = {videoID : {positive polarity}, {negative polarity}} etc
-    # e.g. collection videos: [{videoID1 : [{positive polarity}, {negative polarity}], {videoID2 ...}]
+    # create/update "videos" collection that contains ALL videos
+    # each videoID document will be in the format of 
+    # {videoID : [{num_positive_comments}, {num_negative_comments}... ] etc
 
     doc_ref = db.collection(u'videos').document(videoId)
     doc_ref.set({
         u'positive_comments': positive_pol,
         u'negative_comments': negative_pol,
         u'neutral_comments': neutral_pol,
-        u'average_comments': avg_polarity
+        u'average_polarity': avg_polarity,
+        u'highest_polarity': highest_pol,
+        u'lowest_polarity': lowest_pol,
+        u'comments': {}
     })
+
+    # have a reference that points to the nested comments collection in each video collection
+    comments_document = doc_ref.collection("comments")
+
+    # write each comment of videoId to Firestore db
+    # each video will be its own document, containing every comment
+    # update videoID document (created above) with all comments
+    # i.e. now each videoID document will look like:
+    # {videoID: [{num_positive_comments}, {num_negative_comments}, {commentId: [{polarity}, {likeCount}...]}, {commentId: ...}]}
+    # each comment document will contain videoID, polarity, likeCount, publish time and updated time 
+    for comment in all_comments[0]:
+        com_ref = comments_document.document(comment["commentId"])
+        com_ref.set({
+            u'comments': comment["commentId"],
+            u'textDisplay': comment["textDisplay"],
+            u'polarity': comment["polarity"],
+            u'likeCount': comment["likeCount"],
+            u'time_published': comment["publishedAt"],
+            u'time_updated': comment["updatedAt"]
+        }, merge = True)
+
+
+    # create local csv db file, won't be needed in the future
+    if make_csv:
+        create_csv(all_comments[0], None, pyscriptVidId)
 
     return all_comments
 
@@ -100,12 +115,12 @@ def comment_threads(videoId, make_csv=False):
 
 if __name__ == '__main__':
     # FOR TESTING: hardcoded videoID to test firebase and docker (in the future)
-    # pyscriptVidId = 'z-0skBH1ZEY'
+    pyscriptVidId = 'z-0skBH1ZEY'
 
 
     # FOR TESTING: simple terminal UI to test program for any video ID
-    print("Enter Youtube videoID: ")
-    pyscriptVidId = input()
-    print("You entered: ", pyscriptVidId)
+    # print("Enter Youtube videoID: ")
+    # pyscriptVidId = input()
+    # print("You entered: ", pyscriptVidId)
 
     response = comment_threads(pyscriptVidId, True)
