@@ -8,13 +8,31 @@ from textblob import TextBlob
 
 # set up backend firebase 
 import firebase_admin
-from firebase_admin import credentials
+from firebase_admin import credentials , db
 from firebase_admin import firestore
+from flask import Flask
+from flask_cors import CORS, cross_origin
+
 
 load_dotenv()
 cred = credentials.Certificate('nlp-youtube-374018-firebase-adminsdk-j66ps-f75e10e283.json')
 app = firebase_admin.initialize_app(cred)
 db = firestore.client()
+
+flaskapp = Flask(__name__)
+
+# NOT WORKING: CORS STILL NOT LETTING ME ACCESS BACKEND FROM FRONTEND
+CORS(flaskapp)
+
+# define endpoint routes
+@flaskapp.route('/',methods= ["GET", "POST"])
+def show():
+    return ("hi")
+
+@flaskapp.route('/search/<string:videoid>',methods= ["GET", "POST"])
+def search(videoid):
+    comment_threads(videoid)
+    return("args: "+ videoid)
 
 
 # set up youtube API 
@@ -120,4 +138,9 @@ if __name__ == '__main__':
     # pyscriptVidId = input()
     # print("You entered: ", pyscriptVidId)
 
-    response = comment_threads(pyscriptVidId, True)
+    # response = comment_threads(pyscriptVidId, True)
+
+    # FOR TESTING: FLASK: run on port 5000 
+    # http://127.0.0.1:5000
+    flaskapp.run(port=5000, debug=True)
+

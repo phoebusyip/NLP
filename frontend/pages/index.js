@@ -8,6 +8,7 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import { db } from "../firebase/firebase.js";
 import { collection, getDocs, doc, getDoc, query } from "firebase/firestore";
+import axios from "axios";
 
 import {
   Button,
@@ -53,7 +54,6 @@ function Polarity_Review(props) {
 // component to display comments, once data is found from Firestore
 function ShowComments(props) {
   const { foundVid, hideContent, commentObj, ...rest } = props;
-
   // when page is first rendered or when user is typing
   if (foundVid === false) {
     return null;
@@ -93,10 +93,23 @@ export default function Home() {
     sethideContent(true);
   }, [searchId]);
 
+  const axiosPost = async () => {
+    try {
+      // make axios post request
+      // NOT WORKING: CORS ISSUES
+      const response = await axios.post("http://127.0.0.1:5000/search/", {
+        videoid: searchId,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   // handle submit to see if video data is in Firestore
   // if not, call backend python to update Firestore ( HAVEN'T IMPLEMENETED YET )
   // then get data from Firestore
   function handleSubmit(e) {
+    console.log(foundVid);
     e.preventDefault();
     const getVideo = async () => {
       if (searchId === "") {
@@ -108,12 +121,18 @@ export default function Home() {
       try {
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
+          console.log("search", searchId);
           setVideoid(searchId);
           setVideoObj(docSnap.data());
           setFoundVid(true);
 
-          // STILL WORKING ON RETRIEVING COMMENTS
-          const commentsPath = `videos/${videoid}/comments`;
+          // retrieve comments
+
+          // not sure why videoid is null at this point, using searchId for now
+          // console.log("vid", videoid);
+
+          // create query for comments subcollection
+          const commentsPath = `videos/${searchId}/comments`;
           const q = query(collection(db, commentsPath));
           const commentsSnap = await getDocs(q);
           const commentsArr = commentsSnap.docs.map((doc) => ({
@@ -121,11 +140,12 @@ export default function Home() {
             id: doc.id,
           }));
           setCommentObj(commentsArr);
+          setFoundVid(true);
         } else {
           // no document in Firestore found
-
+          console.log("NOT ON DATABASE, NOW FETCHING BACKEND");
           // now fetch backend python and update Firestore
-          // FETCH, then try again
+          axiosPost();
 
           // what is below should be done AFTER fetching python backend and still failing
           setFoundVid(false);
@@ -137,6 +157,7 @@ export default function Home() {
     };
     getVideo();
   }
+  console.log("count", foundVid);
   return (
     <div>
       <Head>
@@ -157,7 +178,7 @@ export default function Home() {
 
           <Typography variant="h2">enter video id below:</Typography>
           <div className="video_form">
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} method="post">
               <TextField
                 // label="Videoid"
                 name="videoid"
@@ -179,7 +200,7 @@ export default function Home() {
             </Typography>
             <Typography variant="h5">
               {" "}
-              VideoIDs to try: z-0skBH1ZEY , Qo8dXyKXyME
+              VideoIDs to try: z-0skBH1ZEY , Qo8dXyKXyME , _w0Ikk4JY7U
             </Typography>
           </div>
           <div>
