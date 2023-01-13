@@ -3,13 +3,14 @@ By: Phoebus Yip
 
 Interpreters: Python 3.9.6 
 
-( NOTE: NOT UP TO DATE, FIREBASE BROKEN RIGHT NOW)
-To see hosted pure frontend demo: https://nlp--374018.web.app/
-$ cd frontend
+( NOTE: NOT UP TO DATE, FIREBASE BROKEN RIGHT NOW) <br/>
+To see hosted pure frontend demo: https://nlp--374018.web.app/  <br/>
+$ cd frontend <br/>
 $ firebase deploy
 
+
 ## To run website locally:
-$ cd frontend
+$ cd frontend <br/>
 $ npm run dev
 
 ## To use the website:
@@ -20,11 +21,11 @@ e.g. https://www.youtube.com/watch?v=q2RZOiUD5E0 -> video id is q2RZOiUD5E0)
 
 -----
 
-##BACKEND:
-To use the python comment scrapper:
-$ cd backend
-$ pip3 install -r requirements.txt
-$ python3 comment_scraper.py
+## BACKEND:
+To use the python comment scrapper: <br/>
+$ cd backend <br/>
+$ pip3 install -r requirements.txt <br/>
+$ python3 comment_scraper.py <br/>
 
 Enter any videoID e.g.
 - q2RZOiUD5E0
