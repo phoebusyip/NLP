@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { db } from "../firebase/firebase.js";
-import { collection, getDocs, doc, getDoc } from "firebase/firestore";
+import { collection, getDocs, doc, getDoc, query } from "firebase/firestore";
 
 import {
   Button,
@@ -28,40 +28,48 @@ const Emoji = (props) => (
 );
 
 // component to show polarity review, once video data is found from Firestore
-
 function Polarity_Review(props) {
+  const { videoid, videoObj, foundVid, hideContent, commentObj, ...rest } =
+    props;
+
   // if there is no matching result from search
-  if (props.foundVid === false && props.hideContent === false) {
+  if (foundVid === false && hideContent === false) {
     return <p> Cannot find video! Please check the video ID supplied.</p>;
   }
   // when page is first rendered or when user is typing
-  if (props.foundVid === false) {
+  if (foundVid === false) {
     return null;
   }
   return (
     <div>
-      <h4> Polarity review for video ID : {props.videoid}</h4>
-      <p> Average polarity : {props.videoObj.average_polarity}</p>{" "}
-      <p> Number of positive comments: {props.videoObj.positive_comments}</p>
-      <p> Number of negative comments: {props.videoObj.negative_comments}</p>
-      <p> Number of neutral comments: {props.videoObj.neutral_comments}</p>
+      <h4> Polarity review for video ID : {videoid}</h4>
+      <p> Average polarity : {videoObj.average_polarity}</p>{" "}
+      <p> Number of positive comments: {videoObj.positive_comments}</p>
+      <p> Number of negative comments: {videoObj.negative_comments}</p>
+      <p> Number of neutral comments: {videoObj.neutral_comments}</p>
     </div>
   );
 }
-
 // component to display comments, once data is found from Firestore
-function displayComments(props) {
-  // if there is no matching result from search
-  if (props.foundVid === false && props.hideContent === false) {
-    return <p> Cannot find video! Please check the video ID supplied.</p>;
-  }
+function ShowComments(props) {
+  const { foundVid, hideContent, commentObj, ...rest } = props;
+
   // when page is first rendered or when user is typing
-  if (props.foundVid === false) {
+  if (foundVid === false) {
     return null;
   }
-  props.commentObj.docs.forEach((doc) => {
-    return <p>doc.data()</p>;
-  });
+  return (
+    <div>
+      <br></br>
+      <h5>10 Comments from the video</h5>
+      {commentObj.map((comment) => (
+        <>
+          <p>{comment.textDisplay}</p>
+          <p>Polarity score: {comment.polarity}</p>
+        </>
+      ))}
+    </div>
+  );
 }
 
 export default function Home() {
@@ -90,16 +98,6 @@ export default function Home() {
   // then get data from Firestore
   function handleSubmit(e) {
     e.preventDefault();
-    console.log(
-      "vid :",
-      videoid,
-      "search ",
-      searchId,
-      "found ",
-      foundVid,
-      "hide ",
-      hideContent
-    );
     const getVideo = async () => {
       if (searchId === "") {
         setFoundVid(false);
@@ -115,13 +113,14 @@ export default function Home() {
           setFoundVid(true);
 
           // STILL WORKING ON RETRIEVING COMMENTS
-
-          // const commentsRef = collection(db, `videos${videoid}/comments`);
-          // const commentsRef = collection(docRef, "comments");
-          // const commentsSnap = await getDocs(commentsRef);
-          // console.log(commentsSnap);
-          // setCommentObj(commentsSnap.data());
-          // console.log("OBJ", commentObj);
+          const commentsPath = `videos/${videoid}/comments`;
+          const q = query(collection(db, commentsPath));
+          const commentsSnap = await getDocs(q);
+          const commentsArr = commentsSnap.docs.map((doc) => ({
+            ...doc.data(),
+            id: doc.id,
+          }));
+          setCommentObj(commentsArr);
         } else {
           // no document in Firestore found
 
@@ -170,7 +169,6 @@ export default function Home() {
                 variant="contained"
                 color="primary"
                 sx={{ borderRadius: 100 }}
-                // className={classes.button}
               >
                 Search
               </Button>
@@ -193,13 +191,11 @@ export default function Home() {
             ></Polarity_Review>
           </div>
           <div>
-            {/* <displayComments
-              videoid={videoid}
-              videoObj={videoObj}
+            <ShowComments
               commentObj={commentObj}
-              foundVid={foundVid}
               hideContent={hideContent}
-            ></displayComments> */}
+              foundVid={foundVid}
+            ></ShowComments>
           </div>
         </Container>
       </main>
