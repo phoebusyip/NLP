@@ -1,47 +1,46 @@
-Youtube NLP Project
+# YOOTUBE - An NLP Project
 By: Phoebus Yip
 
 Interpreters: Python 3.9.6 
 
+( NOTE: NOT UP TO DATE, FIREBASE BROKEN RIGHT NOW)
 To see hosted pure frontend demo: https://nlp--374018.web.app/
 $ cd frontend
 $ firebase deploy
 
-To run website locally:
+## To run website locally:
 $ cd frontend
 $ npm run dev
 
-To use the website:
+## To use the website:
 enter videoID of any youtube channel, videoID is the code after {?v=}
 e.g. https://www.youtube.com/watch?v=q2RZOiUD5E0 -> video id is q2RZOiUD5E0)
-Website has no functionality right now, only accepts an input form
 
-To be added to the website: 
-Show number of positive, negative and neutral comments of each video. 
-
-Possible ideas:
-Do sentiment analysis on comments with more likes
-Allow user to add words to help sentiment analysis (e.g. "juice" being a negative word in the fitness community, since it refers to steroids and "fake" content)
+** Currently the website can only get information stored on Firestore.**
 
 -----
 
-BACKEND:
+##BACKEND:
 To use the python comment scrapper:
 $ cd backend
 $ pip3 install -r requirements.txt
 $ python3 comment_scraper.py
 
-Enter any videoID after being promopted in the terminal
-examples: 
+Enter any videoID e.g.
 - q2RZOiUD5E0
 - J0soR73Jbio
 
-A document titled {videoID} containing overall polarity scores of all comments will be added to a collection containing all videos in FireStore.
+** Currently the backend only works locally (http://127.0.0.1:5000) **
 
-A collection titled {videoID} will also be created, containing documents for each comment scrapped. These documents contain: videoId, polarity, likeCount, publish_date and last_updated_date. 
+if you enter http://127.0.0.1:5000/search/${videoid}
 
-The terminal will then output # of positive, negative and neutral comments.
-A csv file will also be generated that contains comments in that video, as well as the polarity, like count, publish and update date of each comment.
-For testing purposes only 10 comments are scrapped from each video.
+A document named ${videoID} will be stored on Firebase, with 10 comments and polarity ratings for each comment.
+
+-----
+
+Possible ideas:
+Do sentiment analysis on comments with more likes
+Allow user to add words to help sentiment analysis (e.g. "juice" being a negative word in the fitness community, since it refers to steroids and "fake" content)
+
 
 
