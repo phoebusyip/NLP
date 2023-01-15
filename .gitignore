@@ -73,7 +73,11 @@ node_modules/
 lib/
 pycache/
 bin/
+__pycache__
 
 # backend
 comments_2023*
 nlp-youtube-374018-firebase-adminsdk-j66ps-f75e10e283*
+
+# for testing: github workflows doesnt work rn so i'm just gonna gitignore it for now
+.github/workflows

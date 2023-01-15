@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "source": ".",
+    "public": "out",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"]
   },
   "storage": {
@@ -14,10 +14,5 @@
       "enabled": true
     },
     "singleProjectMode": true
-  },
-  "functions": {
-    "source": ".",
-    "predeploy": ["npm run build"],
-    "runtime": "nodejs16"
   }
 }

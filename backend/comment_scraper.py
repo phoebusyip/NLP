@@ -20,19 +20,24 @@ app = firebase_admin.initialize_app(cred)
 db = firestore.client()
 
 flaskapp = Flask(__name__)
+cors = CORS(flaskapp)
+flaskapp.config['CORS_HEADERS'] = 'Content-Type'
 
 # NOT WORKING: CORS STILL NOT LETTING ME ACCESS BACKEND FROM FRONTEND
-CORS(flaskapp)
+# cors = CORS(flaskapp, resources={r"*": {"origins": "*"}}, supports_credentials=True)
 
 # define endpoint routes
 @flaskapp.route('/',methods= ["GET", "POST"])
+@cross_origin()
 def show():
-    return ("hi")
+    return "Success", 200
+
 
 @flaskapp.route('/search/<string:videoid>',methods= ["GET", "POST"])
+@cross_origin()
 def search(videoid):
     comment_threads(videoid)
-    return("args: "+ videoid)
+    return "args: "+ videoid, 200
 
 
 # set up youtube API 

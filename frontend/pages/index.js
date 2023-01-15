@@ -97,8 +97,10 @@ export default function Home() {
     try {
       // make axios post request
       // NOT WORKING: CORS ISSUES
-      const response = await axios.post("http://127.0.0.1:5000/search/", {
+      const response = await axios.post("http://127.0.0.1:5000/search", {
         videoid: searchId,
+        mode: "cors",
+        withCredentials: true,
       });
     } catch (error) {
       console.log(error);
@@ -157,7 +159,6 @@ export default function Home() {
     };
     getVideo();
   }
-  console.log("count", foundVid);
   return (
     <div>
       <Head>
