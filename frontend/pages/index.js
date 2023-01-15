@@ -203,7 +203,7 @@ export default function Home() {
             <Typography variant="h5">
               Currently this only works with videos that are already in our
               database. To add a new video to our database, enter:
-              https://main-5ynmrux3ba-de.a.run.app/search/${videoID}
+              https://main-5ynmrux3ba-de.a.run.app/search/$'videoid'
             </Typography>
             <Typography variant="h5">
               {" "}
