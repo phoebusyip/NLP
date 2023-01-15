@@ -16,29 +16,28 @@ from flask_cors import CORS, cross_origin
 
 load_dotenv()
 cred = credentials.Certificate('nlp-youtube-374018-firebase-adminsdk-j66ps-f75e10e283.json')
-app = firebase_admin.initialize_app(cred)
+firebase_app = firebase_admin.initialize_app(cred)
 db = firestore.client()
 
-flaskapp = Flask(__name__)
-cors = CORS(flaskapp)
-flaskapp.config['CORS_HEADERS'] = 'Content-Type'
+app = Flask(__name__)
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 
 # NOT WORKING: CORS STILL NOT LETTING ME ACCESS BACKEND FROM FRONTEND
-# cors = CORS(flaskapp, resources={r"*": {"origins": "*"}}, supports_credentials=True)
+# cors = CORS(app, resources={r"*": {"origins": "*"}}, supports_credentials=True)
 
 # define endpoint routes
-@flaskapp.route('/',methods= ["GET", "POST"])
+@app.route('/')
 @cross_origin()
 def show():
-    return "Success", 200
+    return "Success"
 
 
-@flaskapp.route('/search/<string:videoid>',methods= ["GET", "POST"])
+@app.route('/search/<string:videoid>',methods= ["GET", "POST"])
 @cross_origin()
 def search(videoid):
     comment_threads(videoid)
     return "args: "+ videoid, 200
-
 
 # set up youtube API 
 API_KEY = "AIzaSyBVKUAWB-OKmEuPnHEoteXroHWUuRVcidg"
@@ -84,8 +83,8 @@ def comment_threads(videoId, make_csv=False):
             neutral_pol += 1
 
     avg_polarity /= len(comment_obj)
-    print("positive pol: ", positive_pol, "\nnegative pol", negative_pol,
-          "\nneutral pol", neutral_pol, "\naverage pol", avg_polarity)
+    # print("positive pol: ", positive_pol, "\nnegative pol", negative_pol,
+    #       "\nneutral pol", neutral_pol, "\naverage pol", avg_polarity)
 
     # Firestore system. Collection : document1, document2, document3
 
@@ -147,5 +146,7 @@ if __name__ == '__main__':
 
     # FOR TESTING: FLASK: run on port 5000 
     # http://127.0.0.1:5000
-    flaskapp.run(port=5000, debug=True)
+    # app.run(port=5000, debug=True)
+    app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
+
 
