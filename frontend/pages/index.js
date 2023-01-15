@@ -97,11 +97,16 @@ export default function Home() {
     try {
       // make axios post request
       // NOT WORKING: CORS ISSUES
-      const response = await axios.post("http://127.0.0.1:5000/search", {
-        videoid: searchId,
-        mode: "cors",
-        withCredentials: true,
-      });
+      const response = await axios.post(
+        "https://main-5ynmrux3ba-de.a.run.app/search/",
+        {
+          videoid: searchId,
+          mode: "cors",
+          withCredentials: true,
+          // literally trying everything for CORS
+          headers: headers,
+        }
+      );
     } catch (error) {
       console.log(error);
     }
@@ -174,7 +179,7 @@ export default function Home() {
           </Typography>
           <Typography variant="h2">
             use natural language proocessing to analyze overall sentiment of
-            comments in any Youtube video
+            comments in any Youtube video (version 1.1)
           </Typography>
 
           <Typography variant="h2">enter video id below:</Typography>
@@ -197,7 +202,8 @@ export default function Home() {
             </form>
             <Typography variant="h5">
               Currently this only works with videos that are already in our
-              database.
+              database. To add a new video to our database, enter:
+              https://main-5ynmrux3ba-de.a.run.app/search/${videoID}
             </Typography>
             <Typography variant="h5">
               {" "}
