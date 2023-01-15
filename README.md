@@ -3,15 +3,7 @@ By: Phoebus Yip
 
 Interpreters: Python 3.9.6 
 
-( NOTE: NOT UP TO DATE, FIREBASE BROKEN RIGHT NOW) <br/>
-To see hosted pure frontend demo: https://nlp--374018.web.app/  <br/>
-$ cd frontend <br/>
-$ firebase deploy
-
-
-## To run website locally:
-$ cd frontend <br/>
-$ npm run dev
+To see hosted frontend demo: https://nlp--374018.web.app/  <br/>
 
 ## To use the website:
 enter videoID of any youtube channel, videoID is the code after {?v=}
@@ -22,22 +14,31 @@ e.g. https://www.youtube.com/watch?v=q2RZOiUD5E0 -> video id is q2RZOiUD5E0)
 -----
 
 ## BACKEND:
+Hosted on: https://main-5ynmrux3ba-de.a.run.app/
+
+To add videoId comments document in our collection, visit:  <br/>
+https://main-5ynmrux3ba-de.a.run.app/search/$'videoid'
+
+A document named ${videoID} will be stored on Firebase, with 10 comments and polarity ratings for each comment.
+
 To use the python comment scrapper: <br/>
 $ cd backend <br/>
 $ pip3 install -r requirements.txt <br/>
-$ python3 comment_scraper.py <br/>
+$ python3 main.py <br/>
 
 Enter any videoID e.g.
 - q2RZOiUD5E0
 - J0soR73Jbio
 
-** Currently the backend only works locally (http://127.0.0.1:5000) **
-
-if you enter http://127.0.0.1:5000/search/${videoid}
-
-A document named ${videoID} will be stored on Firebase, with 10 comments and polarity ratings for each comment.
-
 -----
+To host on Firebase after adding changes to code:
+$ cd frontend <br/>
+$ npm run build <br/>
+$ firebase deploy
+
+## To run website locally:
+$ cd frontend <br/>
+$ npm run dev
 
 Possible ideas:
 Do sentiment analysis on comments with more likes
