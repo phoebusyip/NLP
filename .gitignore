@@ -69,6 +69,7 @@ node_modules/
 /.next/
 /out/
 
+
 # python
 lib/
 pycache/
@@ -77,7 +78,12 @@ __pycache__
 
 # backend
 comments_2023*
+example_db.csv
 nlp-youtube-374018-firebase-adminsdk-j66ps-f75e10e283*
+Dockerfile
+.dockerignore
+app.yaml
+old_requirements.txt
 
 # for testing: github workflows doesnt work rn so i'm just gonna gitignore it for now
 .github/workflows
