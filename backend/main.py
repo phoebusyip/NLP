@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 from googleapiclient.discovery import build
 # from iteration_utilities import unique_everseen
-from utils.comments import filter_comments, create_csv
+from utils.comments import filter_comments
 from textblob import TextBlob
 
 # set up backend firebase 
@@ -11,10 +11,10 @@ from firebase_admin import credentials , db
 from firebase_admin import firestore
 from flask import Flask
 from flask_cors import CORS, cross_origin
+load_dotenv()
 
 API_KEY = os.getenv("API_KEY")
 FIREBASE_JSON = os.getenv("FIREBASE_JSON")
-load_dotenv()
 cred = credentials.Certificate(FIREBASE_JSON)
 firebase_app = firebase_admin.initialize_app(cred)
 db = firestore.client()
@@ -98,7 +98,7 @@ def comment_threads(videoId):
         u'comments': {}
     })
 
-    # have a reference that points to the nested comments collection in each video collection
+    # have a reference that points to the nested comments collection for each video
     comments_document = doc_ref.collection("comments")
 
     # write each comment of videoId to Firestore db
@@ -121,8 +121,6 @@ def comment_threads(videoId):
 
     return all_comments
 
-# def main():
-    # comment_threads('Qo8dXyKXyME')
 
 if __name__ == '__main__':
     # FOR TESTING: hardcoded videoID to test firebase and docker (in the future)

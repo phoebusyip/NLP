@@ -9,6 +9,7 @@ import { useRouter } from "next/router";
 import { db } from "../firebase/firebase.js";
 import { collection, getDocs, doc, getDoc, query } from "firebase/firestore";
 import axios from "axios";
+import ClipLoader from "react-spinners/ClipLoader";
 
 import {
   Button,
@@ -38,7 +39,7 @@ function Polarity_Review(props) {
     return <p> Cannot find video! Please check the video ID supplied.</p>;
   }
   // when page is first rendered or when user is typing
-  if (foundVid === false) {
+  if (foundVid === false && hideContent === true) {
     return null;
   }
   return (
@@ -55,13 +56,18 @@ function Polarity_Review(props) {
 function ShowComments(props) {
   const { foundVid, hideContent, commentObj, ...rest } = props;
   // when page is first rendered or when user is typing
-  if (foundVid === false) {
+  if (foundVid === false && hideContent === true) {
     return null;
   }
   return (
     <div>
       <br></br>
-      <h5>10 Comments from the video</h5>
+      <h5>
+        {" "}
+        Some comments from the video (Supposed to be 10, but my backend scraps
+        10 PARENT comments, so comment threads with many children comments end
+        up flooding the page)
+      </h5>
       {commentObj.map((comment) => (
         <>
           <p>{comment.textDisplay}</p>
@@ -85,27 +91,43 @@ export default function Home() {
   const [hideContent, sethideContent] = useState(true);
   const [foundVid, setFoundVid] = useState(false);
   const [searchId, setSearchId] = useState("");
+  const [searching, setSearching] = useState(false);
+  const [failedSearch, setFailedSearch] = useState(false);
 
   const videosCollectionRef = collection(db, "videos");
 
+  console.log("run!", "searching", searching);
+
   // hide video not found message when user tries to type another id
+  // rerender when new comments are still fetching
+
+  // test
+  // IkMND33x0qQ
+  // likYKQXBLbw
+
   useEffect(() => {
     sethideContent(true);
   }, [searchId]);
 
-  const axiosPost = async () => {
+  const axiosGet = async () => {
+    setSearching(true);
     try {
-      // make axios post request
-      // NOT WORKING: CORS ISSUES
-      const response = await axios.get(`${process.env.BACKEND}/search`, {
-        videoid: searchId,
-        mode: "cors",
-        withCredentials: true,
-        // literally trying everything for CORS
-        headers: headers,
-      });
+      // make axios get request
+      console.log("inside axiosget, ", searching);
+
+      // having issues with this function being called multiple times
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_BACKEND}/search/${searchId}`,
+        {
+          mode: "cors",
+        }
+      );
+      return true;
     } catch (error) {
       console.log(error);
+      setFoundVid(false);
+      sethideContent(false);
+      return false;
     }
   };
 
@@ -113,28 +135,29 @@ export default function Home() {
   // if not, call backend python to update Firestore ( HAVEN'T IMPLEMENETED YET )
   // then get data from Firestore
   function handleSubmit(e) {
+    setSearching(true);
     console.log(foundVid);
     e.preventDefault();
     const getVideo = async () => {
+      // console.log("inside getvideo");
+      setSearching(true);
+      // initially, or if invalid search result
       if (searchId === "") {
         setFoundVid(false);
+        //TODO: invalid search result
+        setSearching(false);
         return;
       }
       const docRef = doc(videosCollectionRef, `${searchId}`);
-
       try {
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
-          console.log("search", searchId);
           setVideoid(searchId);
           setVideoObj(docSnap.data());
           setFoundVid(true);
-
           // retrieve comments
 
           // not sure why videoid is null at this point, using searchId for now
-          // console.log("vid", videoid);
-
           // create query for comments subcollection
           const commentsPath = `videos/${searchId}/comments`;
           const q = query(collection(db, commentsPath));
@@ -144,22 +167,35 @@ export default function Home() {
             id: doc.id,
           }));
           setCommentObj(commentsArr);
+
+          // test vid: likYKQXBLbw
           setFoundVid(true);
         } else {
           // no document in Firestore found
-          console.log("NOT ON DATABASE, NOW FETCHING BACKEND");
+          console.log(
+            "NOT ON DATABASE, NOW FETCHING BACKEND",
+            "searching",
+            searching
+          );
           // now fetch backend python and update Firestore
-          axiosPost();
+          let validId = await axiosGet();
+          console.log("called getter");
+          if (validId === true) {
+            await getVideo();
+            console.log("called getVid after fetching backend");
+          }
 
           // what is below should be done AFTER fetching python backend and still failing
-          setFoundVid(false);
-          sethideContent(false);
+          // setFoundVid(false);
+          // sethideContent(false);
         }
       } catch (error) {
         console.log(error);
       }
+      setSearching(false);
     };
     getVideo();
+    setSearching(false);
   }
   return (
     <div>
@@ -181,12 +217,16 @@ export default function Home() {
 
           <Typography variant="h2">enter video id below:</Typography>
           <div className="video_form">
-            <form onSubmit={handleSubmit} method="post">
+            <form onSubmit={handleSubmit} method="get">
               <TextField
                 // label="Videoid"
                 name="videoid"
                 helperText="Video id is the string after '?v='"
-                onChange={(e) => setSearchId(e.target.value)}
+                onChange={(e) => {
+                  setSearchId(e.target.value);
+                  setCommentObj([]);
+                  setFoundVid(false);
+                }}
               />
               <Button
                 type="submit"
@@ -198,15 +238,13 @@ export default function Home() {
               </Button>
             </form>
             <Typography variant="h5">
-              Currently this only works with videos that are already in our
-              database. To add a new video to our database, enter:
-              https://main-5ynmrux3ba-de.a.run.app/search/$'videoid'
-            </Typography>
-            <Typography variant="h5">
               {" "}
               VideoIDs to try: z-0skBH1ZEY , Qo8dXyKXyME , _w0Ikk4JY7U
             </Typography>
           </div>
+
+          {/* loading wheel */}
+          {searching ? <ClipLoader color="#ff0050" size={100} /> : ""}
           <div>
             <Polarity_Review
               videoid={videoid}
