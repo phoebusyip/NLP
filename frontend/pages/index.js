@@ -54,11 +54,13 @@ function Polarity_Review(props) {
 }
 // component to display comments, once data is found from Firestore
 function ShowComments(props) {
-  const { foundVid, hideContent, commentObj, ...rest } = props;
+  const { foundVid, hideContent, commentObj, failedSearch, ...rest } = props;
   // when page is first rendered or when user is typing
-  if (foundVid === false && hideContent === true) {
+  // complicated condition, will clean up later
+  if ((foundVid === false && hideContent === true) || failedSearch === true) {
     return null;
   }
+
   return (
     <div>
       <br></br>
@@ -127,6 +129,7 @@ export default function Home() {
       console.log(error);
       setFoundVid(false);
       sethideContent(false);
+      setFailedSearch(true);
       return false;
     }
   };
@@ -226,6 +229,7 @@ export default function Home() {
                   setSearchId(e.target.value);
                   setCommentObj([]);
                   setFoundVid(false);
+                  setFailedSearch(false);
                 }}
               />
               <Button
@@ -258,6 +262,7 @@ export default function Home() {
               commentObj={commentObj}
               hideContent={hideContent}
               foundVid={foundVid}
+              failedSearch={failedSearch}
             ></ShowComments>
           </div>
         </Container>
