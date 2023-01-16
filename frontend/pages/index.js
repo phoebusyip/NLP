@@ -97,16 +97,13 @@ export default function Home() {
     try {
       // make axios post request
       // NOT WORKING: CORS ISSUES
-      const response = await axios.post(
-        "https://main-5ynmrux3ba-de.a.run.app/search/",
-        {
-          videoid: searchId,
-          mode: "cors",
-          withCredentials: true,
-          // literally trying everything for CORS
-          headers: headers,
-        }
-      );
+      const response = await axios.get(`${process.env.BACKEND}/search`, {
+        videoid: searchId,
+        mode: "cors",
+        withCredentials: true,
+        // literally trying everything for CORS
+        headers: headers,
+      });
     } catch (error) {
       console.log(error);
     }

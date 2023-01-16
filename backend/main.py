@@ -4,7 +4,6 @@ from googleapiclient.discovery import build
 # from iteration_utilities import unique_everseen
 from utils.comments import filter_comments, create_csv
 from textblob import TextBlob
-# API_KEY = os.getenv("API_KEY")
 
 # set up backend firebase 
 import firebase_admin
@@ -13,9 +12,10 @@ from firebase_admin import firestore
 from flask import Flask
 from flask_cors import CORS, cross_origin
 
-
+API_KEY = os.getenv("API_KEY")
+FIREBASE_JSON = os.getenv("FIREBASE_JSON")
 load_dotenv()
-cred = credentials.Certificate('nlp-youtube-374018-firebase-adminsdk-j66ps-f75e10e283.json')
+cred = credentials.Certificate(FIREBASE_JSON)
 firebase_app = firebase_admin.initialize_app(cred)
 db = firestore.client()
 
@@ -32,18 +32,18 @@ cors = CORS(app, resources={r"*": {"origins": "*"}}, supports_credentials=True)
 def show():
     return "Success"
 
-@app.route('/search/<string:videoid>',methods= ["GET", "POST"])
+@app.route('/search/<string:videoid>',methods= ["GET"])
 @cross_origin()
 def search(videoid):
     comment_threads(videoid)
     return "added videoID: "+ videoid + " to database", 200
 
 # set up youtube API 
-API_KEY = "AIzaSyBVKUAWB-OKmEuPnHEoteXroHWUuRVcidg"
 youtube = build("youtube", "v3", developerKey=API_KEY)
 
+
 # program to scrape comments and write to Firestore
-def comment_threads(videoId, make_csv=False):
+def comment_threads(videoId):
 
     all_comments = []
 
@@ -82,8 +82,6 @@ def comment_threads(videoId, make_csv=False):
             neutral_pol += 1
 
     avg_polarity /= len(comment_obj)
-    # print("positive pol: ", positive_pol, "\nnegative pol", negative_pol,
-    #       "\nneutral pol", neutral_pol, "\naverage pol", avg_polarity)
 
     # Firestore system. Collection : document1, document2, document3
 
@@ -121,11 +119,6 @@ def comment_threads(videoId, make_csv=False):
             u'time_updated': comment["updatedAt"]
         }, merge = True)
 
-
-    # create local csv db file, won't be needed in the future
-    if make_csv:
-        create_csv(all_comments[0], None, pyscriptVidId)
-
     return all_comments
 
 # def main():
@@ -134,7 +127,7 @@ def comment_threads(videoId, make_csv=False):
 if __name__ == '__main__':
     # FOR TESTING: hardcoded videoID to test firebase and docker (in the future)
     # pyscriptVidId = 'z-0skBH1ZEY'
-    pyscriptVidId = 'Qo8dXyKXyME'
+    # pyscriptVidId = 'Qo8dXyKXyME'
 
     # FOR TESTING: simple terminal UI to test program for any video ID
     # print("Enter Youtube videoID: ")

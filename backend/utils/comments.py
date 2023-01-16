@@ -1,19 +1,19 @@
-import csv
-from datetime import datetime as dt
-today = dt.today().strftime('%Y-%m-%d')
+# import csv
+# from datetime import datetime as dt
+# today = dt.today().strftime('%Y-%m-%d')
 
-
-def create_csv(comments, channelid=None, videoid=None):
-    # look for items
-    header = comments[0].keys()
-    if channelid:
-        filename = f'comments_{channelid}_{today}.csv'
-    else:
-        filename = f'comments_{today}_vidID_{videoid}.csv'
-    with open(filename, 'w', encoding="utf8", newline='') as f:
-        writer = csv.DictWriter(f, fieldnames=header)
-        writer.writeheader()
-        writer.writerows(comments)
+# NOT NEEDED ANYMORE, MAYBE IN THE FUTURE
+# def create_csv(comments, channelid=None, videoid=None):
+#     # look for items
+#     header = comments[0].keys()
+#     if channelid:
+#         filename = f'comments_{channelid}_{today}.csv'
+#     else:
+#         filename = f'comments_{today}_vidID_{videoid}.csv'
+#     with open(filename, 'w', encoding="utf8", newline='') as f:
+#         writer = csv.DictWriter(f, fieldnames=header)
+#         writer.writeheader()
+#         writer.writerows(comments)
 
 
 comments = []
