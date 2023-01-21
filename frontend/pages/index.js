@@ -113,7 +113,7 @@ function index(props) {
             minWidth: "300px",
           }}
         >
-          <Image src={ytIcon} alt="YT" />
+          <Image src={ytIcon} alt="YT" unoptimized={true} />
         </Grid>
       </Grid>
       <div>
