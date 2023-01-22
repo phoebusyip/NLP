@@ -3,3 +3,19 @@
 .heroItem {
   margin-top: 20px;
 }
+
+.bounceAnimation {
+  animation: updown;
+}
+
+@keyframes updown {
+  0% {
+    transform: translate(-20px);
+  }
+  50% {
+    transform: translate(20px);
+  }
+  100% {
+    transform: translate(-20px);
+  }
+}

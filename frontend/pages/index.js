@@ -14,6 +14,7 @@ import { useRouter } from "next/router";
 import { db } from "../firebase/firebase.js";
 import { collection, getDocs, doc, getDoc, query } from "firebase/firestore";
 import axios from "axios";
+import dayjs from "dayjs";
 import ClipLoader from "react-spinners/ClipLoader";
 import Emoji from "../components/Emoji";
 import SearchBar from "../components/SearchBar";
@@ -23,6 +24,7 @@ import PolarityReview from "../components/PolarityReview";
 import ShowComments from "../components/ShowComments";
 import styles from "../styles/index.module.scss";
 import TestComponent from "../components/TestComponent.js";
+import ShowFilteredComments from "../components/ShowFilteredComments.js";
 
 function index(props) {
   // const router = useRouter();
@@ -32,14 +34,24 @@ function index(props) {
 
   //object containing comment entries for each vieo
   const [commentObj, setCommentObj] = useState([]);
+  const [filteredComments, setFilteredComments] = useState([]);
 
-  // flag to hide components when necessary
+  // flag to hide components when necessary -> can be cleaned up more later.
   const [hideContent, sethideContent] = useState(true);
   const [foundVid, setFoundVid] = useState(false);
   const [searchId, setSearchId] = useState("");
   const [searching, setSearching] = useState(false);
   const [failedSearch, setFailedSearch] = useState(false);
 
+  // for date range
+  const [startDate, setStartDate] = useState(dayjs("2022-08-18T21:11:54"));
+  const [endDate, setEndDate] = useState(dayjs("2022-08-18T21:11:54"));
+  // console.log(
+  //   "start date: ",
+  //   startDate.toString(),
+  //   "end: ",
+  //   endDate.toString()
+  // );
   return (
     <div
       style={{ marginLeft: "150px", marginRight: "150px", marginTop: "100px" }}
@@ -113,7 +125,10 @@ function index(props) {
             minWidth: "300px",
           }}
         >
-          <Image src={ytIcon} alt="YT" unoptimized={true} />
+          <div className="bounceAnimation">
+            a
+            <Image src={ytIcon} alt="YT" unoptimized={true} />
+          </div>
         </Grid>
       </Grid>
       <div>
@@ -123,15 +138,20 @@ function index(props) {
           foundVid={foundVid}
           hideContent={hideContent}
           commentObj={commentObj}
+          startDate={startDate}
+          endDate={endDate}
+          setStartDate={setStartDate}
+          setEndDate={setEndDate}
+          setCommentObj={setCommentObj}
         />
       </div>
       <div>
-        <ShowComments
+        {/* <ShowFilteredComments
           foundVid={foundVid}
           hideContent={hideContent}
           commentObj={commentObj}
           failedSearch={failedSearch}
-        />
+        /> */}
       </div>
     </div>
   );

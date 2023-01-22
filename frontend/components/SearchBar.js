@@ -44,7 +44,7 @@ export default function SearchBar(props) {
 
   const videosCollectionRef = collection(db, "videos");
 
-  console.log("run!", "searching", searching, "searchid", searchId);
+  // console.log("run!", "searching", searching, "searchid", searchId);
 
   // hide video not found message when user tries to type another id
   // rerender when new comments are still fetching
@@ -55,7 +55,13 @@ export default function SearchBar(props) {
 
   useEffect(() => {
     sethideContent(true);
+    // setEndDate();
   }, [searchId]);
+
+  // every time startDate or endDate changes, do another query with new date range
+  // useEffect(() => {
+
+  // }, [startDate, endDate])
 
   const axiosGet = async () => {
     setSearching(true);
