@@ -5,6 +5,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
 import { MobileDatePicker } from "@mui/x-date-pickers/MobileDatePicker";
+import dayjs from "dayjs";
 
 export default function MaterialUIPickers(props) {
   const {
@@ -21,14 +22,14 @@ export default function MaterialUIPickers(props) {
     ...rest
   } = props;
   const handleStartChange = (newValue) => {
-    setStartDate(newValue);
+    setStartDate(dayjs(newValue).toDate());
   };
   const handleEndChange = (newValue) => {
-    setEndDate(newValue);
+    setEndDate(dayjs(newValue).toDate());
   };
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Stack spacing={3}>
+      <Stack direction="row" spacing={3}>
         <DesktopDatePicker
           label="Start Date"
           inputFormat="MM/DD/YYYY"
@@ -44,7 +45,7 @@ export default function MaterialUIPickers(props) {
               }}
             />
           )}
-          minDate={startDate}
+          // minDate={startDate}
         />
         <DesktopDatePicker
           label="End Date"
@@ -61,7 +62,7 @@ export default function MaterialUIPickers(props) {
               }}
             />
           )}
-          minDate={startDate}
+          // minDate={startDate}
         />
       </Stack>
     </LocalizationProvider>

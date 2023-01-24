@@ -7,9 +7,17 @@ import { useEffect, useState } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { db } from "../firebase/firebase.js";
-import { collection, getDocs, doc, getDoc, query } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  doc,
+  getDoc,
+  query,
+  where,
+  orderBy,
+} from "firebase/firestore";
 import axios from "axios";
-import ClipLoader from "react-spinners/ClipLoader";
+import dayjs from "dayjs";
 
 import Emoji from "./Emoji.js";
 import {
@@ -31,6 +39,8 @@ export default function SearchBar(props) {
     foundVid,
     searchId,
     searching,
+    startDate,
+    endDate,
     setVideoid,
     setVideoObj,
     setCommentObj,
@@ -39,15 +49,14 @@ export default function SearchBar(props) {
     setSearchId,
     setSearching,
     setFailedSearch,
+    setStartDate,
+    setEndDate,
+    setNegativeComments,
     ...rest
   } = props;
 
+  const [commentsRef, setCommentsRef] = useState("");
   const videosCollectionRef = collection(db, "videos");
-
-  // console.log("run!", "searching", searching, "searchid", searchId);
-
-  // hide video not found message when user tries to type another id
-  // rerender when new comments are still fetching
 
   // test
   // IkMND33x0qQ
@@ -55,21 +64,58 @@ export default function SearchBar(props) {
 
   useEffect(() => {
     sethideContent(true);
-    // setEndDate();
   }, [searchId]);
 
   // every time startDate or endDate changes, do another query with new date range
-  // useEffect(() => {
+  useEffect(() => {
+    filterCommentsByDate();
+  }, [startDate, endDate]);
 
-  // }, [startDate, endDate])
+  // function to filter comments within date range.
+  const filterCommentsByDate = async () => {
+    try {
+      const commentsPath = `videos/${searchId}/comments`;
+      const commentsRef = collection(db, commentsPath);
+      let q = query(
+        commentsRef,
+        where("time_published", "<=", endDate),
+        where("time_published", ">=", startDate)
+      );
+      let snapshot = await getDocs(q);
+      let commentsArr = snapshot.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      }));
+      // console.log(commentsArr);
+      setCommentObj(commentsArr);
 
-  const axiosGet = async () => {
+      // // now set negativeComments
+      // q = query(
+      //   commentsRef,
+      //   where("time_published", "<=", endDate),
+      //   where("time_published", ">=", startDate),
+      //   orderBy("polarity", "desc")
+      // );
+      // snapshot = await getDocs(q);
+      // commentsArr = snapshot.docs.map((doc) => ({
+      //   ...doc.data(),
+      //   id: doc.id,
+      // }));
+      // setNegativeComments(commentsArr);
+    } catch (error) {
+      console.log(error);
+      return "";
+    }
+  };
+
+  // fetch python backend to create a new video document on firestore.
+  // only fetched when video is not already on firestore
+  const backendGet = async () => {
     setSearching(true);
     try {
       // make axios get request
-      console.log("inside axiosget, ", searching);
+      console.log("inside backendGet, ", searching);
 
-      // having issues with this function being called multiple times
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_BACKEND}/search/${searchId}`,
         {
@@ -87,33 +133,29 @@ export default function SearchBar(props) {
   };
 
   // handle submit to see if video data is in Firestore
-  // if not, call backend python to update Firestore ( HAVEN'T IMPLEMENETED YET )
+  // if not, call backend python to update Firestore
   // then get data from Firestore
   function handleSubmit(e) {
     e.preventDefault();
 
     setSearching(true);
-    console.log(foundVid);
     const getVideo = async () => {
-      // console.log("inside getvideo");
       setSearching(true);
       // initially, or if invalid search result
       if (searchId === "") {
         setFoundVid(false);
-        //TODO: invalid search result
         setSearching(false);
         return;
       }
       const docRef = doc(videosCollectionRef, `${searchId}`);
       try {
+        // retrieve comments
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           setVideoid(searchId);
           setVideoObj(docSnap.data());
           setFoundVid(true);
-          // retrieve comments
 
-          // not sure why videoid is null at this point, using searchId for now
           // create query for comments subcollection
           const commentsPath = `videos/${searchId}/comments`;
           const q = query(collection(db, commentsPath));
@@ -124,7 +166,7 @@ export default function SearchBar(props) {
           }));
           setCommentObj(commentsArr);
 
-          // test vid: likYKQXBLbw
+          //TODO:  set start date TO VIDEO START DATE(need to change backend)
           setFoundVid(true);
         } else {
           // no document in Firestore found
@@ -134,16 +176,12 @@ export default function SearchBar(props) {
             searching
           );
           // now fetch backend python and update Firestore
-          let validId = await axiosGet();
+          let validId = await backendGet();
           console.log("called getter");
           if (validId === true) {
             await getVideo();
             console.log("called getVid after fetching backend");
           }
-
-          // what is below should be done AFTER fetching python backend and still failing
-          // setFoundVid(false);
-          // sethideContent(false);
         }
       } catch (error) {
         console.log(error);

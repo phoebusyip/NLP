@@ -1,31 +1,51 @@
-import React from "react";
+import * as React from "react";
+import dayjs from "dayjs";
+import Stack from "@mui/material/Stack";
+import TextField from "@mui/material/TextField";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { TimePicker } from "@mui/x-date-pickers/TimePicker";
+import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
+import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
+import { MobileDatePicker } from "@mui/x-date-pickers/MobileDatePicker";
 
-// component to display comments, once data is found from Firestore
-function ShowComments(props) {
-  const { foundVid, hideContent, commentObj, failedSearch, ...rest } = props;
-  // when page is first rendered or when user is typing
-  // complicated condition, will clean up later
-  if ((foundVid === false && hideContent === true) || failedSearch === true) {
-    return null;
-  }
+export default function ResponsiveDatePicker() {
+  const [value, setValue] = React.useState(dayjs("2014-08-18T21:11:54"));
+
+  const handleChange = (newValue) => {
+    setValue(newValue);
+  };
 
   return (
-    <div>
-      <br></br>
-      <h5>
-        {" "}
-        Some comments from the video (Supposed to be 10, but my backend scraps
-        10 PARENT comments, so comment threads with many children comments end
-        up flooding the page)
-      </h5>
-      {commentObj.map((comment) => (
-        <>
-          <p>{comment.textDisplay}</p>
-          <p>Polarity score: {comment.polarity}</p>
-        </>
-      ))}
-    </div>
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <Stack spacing={3}>
+        <DesktopDatePicker
+          label="Date desktop"
+          inputFormat="MM/DD/YYYY"
+          value={value}
+          onChange={handleChange}
+          renderInput={(params) => <TextField {...params} />}
+        />
+        <MobileDatePicker
+          label="Date mobile"
+          inputFormat="MM/DD/YYYY"
+          value={value}
+          onChange={handleChange}
+          renderInput={(params) => <TextField {...params} />}
+        />
+        <TimePicker
+          label="Time"
+          value={value}
+          onChange={handleChange}
+          renderInput={(params) => <TextField {...params} />}
+        />
+        <DateTimePicker
+          label="Date&Time picker"
+          value={value}
+          onChange={handleChange}
+          renderInput={(params) => <TextField {...params} />}
+        />
+      </Stack>
+    </LocalizationProvider>
   );
 }
-
-export default ShowComments;
