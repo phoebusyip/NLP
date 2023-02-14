@@ -13,7 +13,6 @@ function ShowPositive(props) {
   const polarityAscending = [...commentObj].sort(
     (a, b) => b.polarity - a.polarity
   );
-  console.log(polarityAscending);
 
   return (
     <Box sx={{ marginTop: "50px", marginBottom: "100px" }}>

@@ -88,20 +88,6 @@ export default function SearchBar(props) {
       }));
       // console.log(commentsArr);
       setCommentObj(commentsArr);
-
-      // // now set negativeComments
-      // q = query(
-      //   commentsRef,
-      //   where("time_published", "<=", endDate),
-      //   where("time_published", ">=", startDate),
-      //   orderBy("polarity", "desc")
-      // );
-      // snapshot = await getDocs(q);
-      // commentsArr = snapshot.docs.map((doc) => ({
-      //   ...doc.data(),
-      //   id: doc.id,
-      // }));
-      // setNegativeComments(commentsArr);
     } catch (error) {
       console.log(error);
       return "";
@@ -155,6 +141,7 @@ export default function SearchBar(props) {
           setVideoid(searchId);
           setVideoObj(docSnap.data());
           setFoundVid(true);
+          setStartDate(dayjs(videoObj.vid_publishedAt).toDate());
 
           // create query for comments subcollection
           const commentsPath = `videos/${searchId}/comments`;

@@ -13,6 +13,8 @@ import {
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { db } from "../firebase/firebase.js";
+import Link from "next/link";
+
 import { collection, getDocs, doc, getDoc, query } from "firebase/firestore";
 import axios from "axios";
 import dayjs from "dayjs";
@@ -54,6 +56,9 @@ function index(props) {
     <div
       style={{ marginLeft: "150px", marginRight: "150px", marginTop: "100px" }}
     >
+      <Link href="/purchase">
+        <Button>UNLOCK PREMIUM</Button>
+      </Link>
       <Grid container spacing={0}>
         <Grid
           container
@@ -164,6 +169,7 @@ function index(props) {
 
       <div>
         <ShowPositive
+          videoObj={videoObj}
           commentObj={commentObj}
           negativeComments={negativeComments}
           hideContent={hideContent}

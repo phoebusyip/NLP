@@ -45,7 +45,7 @@ export default function MaterialUIPickers(props) {
               }}
             />
           )}
-          // minDate={startDate}
+          minDate={dayjs(videoObj.vid_publishedAt).toDate()}
         />
         <DesktopDatePicker
           label="End Date"

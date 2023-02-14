@@ -8,11 +8,11 @@ from datetime import datetime
 from dateutil import parser
 from pprint import pprint
 
-# set up backend firebase 
+# set up backend firebase
 import firebase_admin
-from firebase_admin import credentials , db
+from firebase_admin import credentials, db
 from firebase_admin import firestore
-from flask import Flask
+from flask import Flask, redirect, url_for
 from flask_cors import CORS, cross_origin
 load_dotenv()
 
@@ -26,22 +26,36 @@ app = Flask(__name__)
 CORS(app)
 # app.config['CORS_HEADERS'] = 'Content-Type'
 
-# NOT WORKING: CORS STILL NOT LETTING ME ACCESS BACKEND FROM FRONTEND
 cors = CORS(app, resources={r"*": {"origins": "*"}}, supports_credentials=True)
 
 # define endpoint routes
+
+
 @app.route('/')
 @cross_origin()
 def show():
     return "Success"
 
-@app.route('/search/<string:videoid>',methods= ["GET"])
+
+@app.route('/search/<string:videoid>', methods=["GET"])
 @cross_origin()
 def search(videoid):
     comment_threads(videoid)
-    return "added videoID: "+ videoid + " to database", 200
+    return "added videoID: " + videoid + " to database", 200
 
-# set up youtube API 
+
+@app.route('/purchase')
+def purchase():
+    return redirect("https://yootube.web.app/purchase", code=302)
+
+
+# stripe
+app.config['STRIPE_PUBLIC_KEY'] = os.getenv("STRIPE_PUBLIC_KEY")
+app.config['STRIPE_SECRET_KEY'] = os.getenv("STRIPE_SECRET_KEY")
+
+# end stripe
+
+# set up youtube API
 youtube = build("youtube", "v3", developerKey=API_KEY)
 
 
@@ -73,12 +87,6 @@ def comment_threads(videoId):
     channel_subs = channelDetails['items'][0]['statistics']['subscriberCount']
     channel_vid_count = channelDetails['items'][0]['statistics']['videoCount']
     channel_view_count = channelDetails['items'][0]['statistics']['viewCount']
-
-
-    # pprint(channelDetails['items'][0]['snippet'])
-
-    # pprint(videoDetails['items'][0].keys())
-    # pprint(videoDetails['items'][0]['snippet'])
     thumbnail = "https://img.youtube.com/vi/"+videoId + "/maxresdefault.jpg"
     vid_title = videoDetails['items'][0]['snippet']["localized"]['title']
     vid_publishedAt = videoDetails['items'][0]['snippet']["publishedAt"]
@@ -86,7 +94,6 @@ def comment_threads(videoId):
     vid_likes = videoDetails['items'][0]['statistics']['likeCount']
     vid_views = videoDetails['items'][0]['statistics']['viewCount']
     vid_commentCount = videoDetails['items'][0]['statistics']['commentCount']
-
 
     # allcomments[0] is the list of comment objects
     all_comments.append(filter_comments(response["items"]))
@@ -98,7 +105,7 @@ def comment_threads(videoId):
     neutral_pol = 0
     highest_pol = float('-inf')
     lowest_pol = float('inf')
-    
+
     for comment_obj in all_comments[0]:
 
         text = TextBlob(str(comment_obj["textOriginal"]))
@@ -115,7 +122,7 @@ def comment_threads(videoId):
             neutral_pol += 1
 
     avg_polarity /= len(comment_obj)
-    
+
     # Firestore system. Collection : document1, document2, document3
 
     # write overall polarity for all comments for video to Firestore db
@@ -140,19 +147,19 @@ def comment_threads(videoId):
         u'vid_views': vid_views,
         u"vid_commentCount": vid_commentCount,
         u'channel_thumbnail': channelDetails['items'][0]['snippet']['thumbnails']['high']['url'],
-        u'channel_title':channelDetails['items'][0]['snippet']['title'],
+        u'channel_title': channelDetails['items'][0]['snippet']['title'],
         u'channel_subs': channelDetails['items'][0]['statistics']['subscriberCount'],
-        u'channel_vid_count':channelDetails['items'][0]['statistics']['videoCount'],
-        u'channel_view_count':channelDetails['items'][0]['statistics']['viewCount']
+        u'channel_vid_count': channelDetails['items'][0]['statistics']['videoCount'],
+        u'channel_view_count': channelDetails['items'][0]['statistics']['viewCount']
     })
 
     # have a reference that points to the nested comments collection for each video
     comments_document = doc_ref.collection("comments")
 
     # write each comment of videoId to Firestore db
-    # each video will be its own document, containing: 
+    # each video will be its own document, containing:
     # collection: a comments collection containing all comments:
-        # each comment document in this collection will contain videoID, polarity, likeCount, publish time and updated time of comment
+    # each comment document in this collection will contain videoID, polarity, likeCount, publish time and updated time of comment
     # documents of polarity scores e.g. average polarity, highest polarity and number of positive comments
 
     # update videoID document (created above) with all comments
@@ -166,7 +173,7 @@ def comment_threads(videoId):
             u'likeCount': comment["likeCount"],
             u'time_published': parser.isoparse(comment["publishedAt"]),
             u'time_updated': parser.isoparse(comment["updatedAt"])
-        }, merge = True)
+        }, merge=True)
 
     return all_comments
 
@@ -178,6 +185,6 @@ if __name__ == '__main__':
     # pyscriptVidId = 'Qo8dXyKXyME'
     # response = comment_threads(pyscriptVidId)
 
-    # FOR TESTING: FLASK: run on port 5000 
+    # FOR TESTING: FLASK: run on port 5000
     # http://127.0.0.1:5000
     app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
