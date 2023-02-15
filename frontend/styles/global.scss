@@ -2,7 +2,11 @@
 
 body {
   font-family: $font-type;
-  background-color: $primary;
-  color: $font-color;
+  background-color: #262932;
+  color: #f7f8ee;
   margin: 0 auto;
+}
+
+* {
+  box-sizing: border-box;
 }
