@@ -88,3 +88,6 @@ old_requirements.txt
 
 # for testing: github workflows doesnt work rn so i'm just gonna gitignore it for now
 .github/workflows
+
+
+virtual
